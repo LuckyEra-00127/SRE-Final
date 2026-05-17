@@ -1,0 +1,54 @@
+groups:
+  - name: habit-tracker-availability
+    rules:
+      - alert: HabitTrackerAPIDown
+        expr: up{job="habit-tracker-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: habit-tracker-api
+        annotations:
+          summary: "Habit Tracker API is down"
+          description: "Prometheus cannot scrape the FastAPI backend /metrics endpoint."
+
+  - name: habit-tracker-slo
+    rules:
+      - alert: HabitTrackerHighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="habit-tracker-api", status=~"5.."}[2m]))
+            /
+            sum(rate(http_requests_total{job="habit-tracker-api"}[2m]))
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+          service: habit-tracker-api
+        annotations:
+          summary: "High API error rate"
+          description: "More than 5% of backend HTTP requests are returning 5xx errors."
+
+      - alert: HabitTrackerHighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="habit-tracker-api"}[5m])) by (le)
+          ) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          service: habit-tracker-api
+        annotations:
+          summary: "High API latency"
+          description: "The 95th percentile API latency is higher than 500ms."
+
+      - alert: HabitTrackerNoTraffic
+        expr: |
+          sum(rate(http_requests_total{job="habit-tracker-api"}[5m])) == 0
+        for: 5m
+        labels:
+          severity: info
+          service: habit-tracker-api
+        annotations:
+          summary: "No API traffic detected"
+          description: "No HTTP requests were observed for 5 minutes."

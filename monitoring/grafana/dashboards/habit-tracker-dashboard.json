@@ -1,0 +1,206 @@
+{
+  "id": null,
+  "uid": "habit-tracker-sre",
+  "title": "Habit Tracker SRE Dashboard",
+  "tags": ["sre", "habit-tracker", "fastapi"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "API Availability",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "up{job=\"habit-tracker-api\"}",
+          "legendFormat": "API up"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "DOWN" },
+                "1": { "text": "UP" }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Request Rate",
+      "gridPos": { "x": 6, "y": 0, "w": 9, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"habit-tracker-api\"}[1m]))",
+          "legendFormat": "requests/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "5xx Error Rate",
+      "gridPos": { "x": 15, "y": 0, "w": 9, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"habit-tracker-api\", status=~\"5..\"}[2m]))",
+          "legendFormat": "5xx/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "P95 API Latency",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"habit-tracker-api\"}[5m])) by (le))",
+          "legendFormat": "p95 latency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Active Habits",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "active_habits_count",
+          "legendFormat": "active habits"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Habit Check-ins",
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(habit_checkins_total[5m])) by (frequency)",
+          "legendFormat": "{{frequency}} check-ins/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Requests by Status Code",
+      "gridPos": { "x": 12, "y": 10, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"habit-tracker-api\"}[1m])) by (status)",
+          "legendFormat": "status {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  }
+}

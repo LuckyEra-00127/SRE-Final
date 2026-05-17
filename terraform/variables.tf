@@ -83,3 +83,34 @@ variable "frontend_api_url" {
   type        = string
   default     = "http://localhost:8000"
 }
+
+variable "prometheus_port" {
+  description = "Host port for Prometheus."
+  type        = number
+  default     = 9090
+}
+
+variable "grafana_port" {
+  description = "Host port for Grafana."
+  type        = number
+  default     = 3001
+}
+
+variable "alertmanager_port" {
+  description = "Host port for Alertmanager."
+  type        = number
+  default     = 9093
+}
+
+variable "grafana_admin_user" {
+  description = "Grafana admin username."
+  type        = string
+  default     = "admin"
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password."
+  type        = string
+  sensitive   = true
+  default     = "admin"
+}
